@@ -13,7 +13,7 @@ I'm deliberately opening the problem to other people to see whether collaboratio
 
 ## The experiment
 
-For the next 72 hours, I'm using this repository as an open laboratory.
+For the next 24 hours, I'm using this repository as an open laboratory.
 
 I'll explore:
 

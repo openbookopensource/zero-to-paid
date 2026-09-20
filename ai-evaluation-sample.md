@@ -93,4 +93,3 @@ This sample evaluates an AI response against:
 * Ability to distinguish generic advice from scenario-specific risks
 
 **Status:** Demonstration sample — not independently validated against a production evaluation benchmark.
-

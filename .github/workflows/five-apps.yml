@@ -1,0 +1,21 @@
+name: Five Apps Windows checks
+on:
+  push:
+    branches: [five-apps-launch]
+  pull_request:
+    paths: ['five-apps/**', '.github/workflows/five-apps.yml']
+permissions:
+  contents: read
+jobs:
+  behavior:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, resolved from upstream
+        with:
+          persist-credentials: false
+      - name: Static batch checks
+        run: python five-apps/tools/batch_lint.py five-apps/package/Install-5-Apps.bat five-apps/package/Uninstall-5-Apps.bat
+      - name: Windows behavior with simulated apps
+        shell: powershell
+        run: ./five-apps/tests/test-windows.ps1

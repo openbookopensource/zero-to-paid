@@ -140,7 +140,7 @@ if defined DRY (
   >>"%REPORT%" echo %ID% - dry run, nothing installed
   exit /b 0
 )
-winget list --id "%ID%" -e --accept-source-agreements >nul 2>&1
+winget list --id "%ID%" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
 if !errorlevel! equ 0 (
   set "RESULT=Already on this PC (left untouched)"
   goto :install_done
@@ -156,7 +156,7 @@ set /a TRY+=1
 echo   Installing %ID% (attempt !TRY! of 3)...
 winget install --id "%ID%" -e --source winget --silent --accept-package-agreements --accept-source-agreements --disable-interactivity >>"%LOG%" 2>&1
 set "WRC=!errorlevel!"
-winget list --id "%ID%" -e --accept-source-agreements >nul 2>&1
+winget list --id "%ID%" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
 if !errorlevel! equ 0 (
   set "RESULT=Installed and verified"
   >>"%DONEFILE%" echo %ID%
@@ -223,7 +223,7 @@ for /f "usebackq delims=" %%A in ("%DONEFILE%") do (
   if defined OK (
     echo   Removing %%A ...
     winget uninstall --id "%%A" -e --silent --disable-interactivity --accept-source-agreements >>"%LOG%" 2>&1
-    winget list --id "%%A" -e --accept-source-agreements >nul 2>&1
+    winget list --id "%%A" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
     set "VERIFY_RC=!errorlevel!"
     if not !VERIFY_RC! equ -1978335212 (
       echo   Could not remove %%A. Close it if it is open and run this again.

@@ -77,3 +77,6 @@ Assert ($output[-1] -eq 0) 'Undo succeeds'
 Assert (-not (Test-Path $state)) 'Undo clears completed records'
 Assert ((Get-Content $env:FIVEAPPS_MOCK_STATE) -eq 'Google.Chrome') 'Undo preserves pre-existing Chrome'
 Write-Host 'All mocked Windows behavior checks passed. Real application installation is a separate check.'
+
+# Expected absence queries return a nonzero native code; all assertions above passed.
+exit 0

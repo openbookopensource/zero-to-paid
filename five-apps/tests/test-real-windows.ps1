@@ -102,3 +102,6 @@ foreach ($id in $expected) {
 if (Test-Path $state) { throw 'Undo left ownership records behind.' }
 Write-Host 'PASS: Real Windows 11 install, rerun and undo completed; pre-existing apps preserved'
 Write-Host 'LIMIT: ARM64 runner; no x64 client, interactive UAC, first-launch GUI, offline or low-disk claim.'
+
+# Expected absence queries return a nonzero native code; all assertions above passed.
+exit 0

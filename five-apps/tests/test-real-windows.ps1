@@ -59,7 +59,12 @@ Write-Host 'PASS: Staged downloads scanned; no matching Defender detection repor
 $install = Join-Path $root 'package\Install-5-Apps.bat'
 function Run-Package([string]$argument='') {
     & cmd.exe /d /c "`"$install`" $argument < NUL" | Out-Host
-    if ($LASTEXITCODE -ne 0) { throw "Package failed for '$argument', code $LASTEXITCODE" }
+    if ($LASTEXITCODE -ne 0) {
+        $rc = $LASTEXITCODE
+        Get-Content (Join-Path $env:TEMP '5-apps-install-log.txt') -Tail 70 -ErrorAction SilentlyContinue | Out-Host
+        Get-Process -Name 'notepad++' -ErrorAction SilentlyContinue | Select-Object ProcessName,Id | Format-Table | Out-Host
+        throw "Package failed for '$argument', code $rc"
+    }
 }
 Run-Package '/dryrun'
 Run-Package

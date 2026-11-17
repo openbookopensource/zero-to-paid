@@ -223,9 +223,10 @@ for /f "usebackq delims=" %%A in ("%DONEFILE%") do (
   if defined OK (
     echo   Removing %%A ...
     winget uninstall --id "%%A" -e --silent --disable-interactivity --accept-source-agreements >>"%LOG%" 2>&1
-    winget list --id "%%A" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
-    set "VERIFY_RC=!errorlevel!"
-    if not !VERIFY_RC! equ -1978335212 (
+    set "UNINSTALL_RC=!errorlevel!"
+    >>"%LOG%" echo %%A uninstall exit code !UNINSTALL_RC!
+    call :wait_removed "%%A"
+    if errorlevel 1 (
       echo   Could not remove %%A. Close it if it is open and run this again.
       >>"%KEEPFILE%" echo %%A
       if errorlevel 1 exit /b 1
@@ -250,3 +251,16 @@ if !UFAIL! gtr 0 (
 pause
 if !UFAIL! gtr 0 exit /b 1
 exit /b 0
+
+:wait_removed
+set /a REMOVE_CHECK=0
+:check_removed_again
+winget list --id "%~1" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
+set "REMOVE_RC=!errorlevel!"
+if !REMOVE_RC! equ -1978335212 exit /b 0
+if not !REMOVE_RC! equ 0 exit /b 1
+set /a REMOVE_CHECK+=1
+if !REMOVE_CHECK! geq 6 exit /b 1
+REM Some uninstallers return before their child process removes registration.
+powershell -NoProfile -Command "Start-Sleep -Seconds 2"
+goto :check_removed_again

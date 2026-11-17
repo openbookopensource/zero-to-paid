@@ -68,6 +68,11 @@ function Run-Package([string]$argument='') {
 }
 Run-Package '/dryrun'
 Run-Package
+$protectionAfterInstall = Get-MpComputerStatus
+if (-not $protectionAfterInstall.AntivirusEnabled -or -not $protectionAfterInstall.RealTimeProtectionEnabled) {
+    throw 'Endpoint protection is not active after installation.'
+}
+Write-Host 'PASS: Endpoint protection remains active after installation'
 foreach ($id in $ids) {
     & $winget list --id $id -e --source winget --disable-interactivity --accept-source-agreements | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "Installed app not verified: $id" }

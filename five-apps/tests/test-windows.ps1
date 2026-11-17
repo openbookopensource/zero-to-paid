@@ -40,6 +40,7 @@ function Run-Installer([string]$arg='') {
  $text = & cmd.exe /d /c "`"$install`" $arg < NUL" 2>&1
  $rc = $LASTEXITCODE
  $text | ForEach-Object { Write-Host $_ }
+ Write-Host "Wrapper exit code: $rc"
  return $rc
 }
 function Assert([bool]$ok, [string]$message) { if(-not $ok) { throw $message }; Write-Host "PASS: $message" }

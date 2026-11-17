@@ -67,7 +67,7 @@ if not exist "%STATE%" (
   pause
   exit /b 1
 )
->"%STATE%\write-check.tmp" echo FiveApps
+call :append_record "FiveApps" "%STATE%\write-check.tmp"
 if errorlevel 1 (
   echo Cannot write install records. No apps were installed.
   pause
@@ -159,7 +159,7 @@ set "WRC=!errorlevel!"
 winget list --id "%ID%" -e --source winget --disable-interactivity --accept-source-agreements >nul 2>&1
 if !errorlevel! equ 0 (
   set "RESULT=Installed and verified"
-  >>"%DONEFILE%" echo %ID%
+  call :append_record "%ID%" "%DONEFILE%"
   if errorlevel 1 (
     set "RESULT=FAILED: installed but record could not be saved. Remove manually using Windows Installed apps."
     set "RECORD_FAILED=1"
@@ -182,7 +182,7 @@ exit /b 0
 :stop
 echo.
 echo   PROBLEM: %~1
-echo   Nothing was changed on your PC.
+echo   App installation stopped. See the report for details.
 echo   Need help? Contact %SUPPORT%
 echo.
 >>"%REPORT%" echo STOPPED: %~1
@@ -228,12 +228,12 @@ for /f "usebackq delims=" %%A in ("%DONEFILE%") do (
     call :wait_removed "%%A"
     if errorlevel 1 (
       echo   Could not remove %%A. Close it if it is open and run this again.
-      >>"%KEEPFILE%" echo %%A
+      call :append_record "%%A" "%KEEPFILE%"
       if errorlevel 1 exit /b 1
       set /a UFAIL+=1
     )
   ) else (
-    >>"%KEEPFILE%" echo %%A
+    call :append_record "%%A" "%KEEPFILE%"
     if errorlevel 1 exit /b 1
     set /a UFAIL+=1
   )
@@ -264,3 +264,9 @@ if !REMOVE_CHECK! geq 6 exit /b 1
 REM Some uninstallers return before their child process removes registration.
 powershell -NoProfile -Command "Start-Sleep -Seconds 2"
 goto :check_removed_again
+
+:append_record
+set "RECORD_ID=%~1"
+set "RECORD_TARGET=%~2"
+powershell -NoProfile -Command "try { [IO.File]::AppendAllText($env:RECORD_TARGET, $env:RECORD_ID+[Environment]::NewLine); exit 0 } catch { exit 1 }"
+exit /b !errorlevel!

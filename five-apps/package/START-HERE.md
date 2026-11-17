@@ -16,4 +16,4 @@ Use the same Windows administrator account for installation and undo. Close the 
 
 The tracking file is `%LOCALAPPDATA%\FiveApps\installed-by-us.txt`. Do not edit it unless resolving a tracking problem. If installation fails, read the Desktop report. The diagnostic log is `%TEMP%\5-apps-install-log.txt`. Check logs for personal paths before sharing them with the person who supplied this package.
 
-If winget is missing, update Microsoft App Installer through Microsoft Store and retry. If the network check fails, check the connection or ask IT about network policy. A partial install can leave some apps installed; rerun to check them again or use undo. No commercial support promise is made for this test candidate.
+If winget is missing, update Microsoft App Installer through Microsoft Store and retry. If winget reports a download or source failure, check the connection or ask IT about network policy. A partial install can leave some apps installed; rerun to check them again or use undo. No commercial support promise is made for this test candidate.

@@ -61,6 +61,11 @@ $before=Get-Content $state -Raw
 $output=Run-Installer
 Assert ($output[-1] -eq 0) 'Repeat succeeds'
 Assert ((Get-Content $state -Raw) -eq $before) 'Repeat adds no duplicate records'
+Set-Content $state 'Google.Chrome" & echo INJECTED'
+$output=Run-Installer '/undo'
+Assert ($output[-1] -eq 1) 'Invalid ledger fails closed before removal'
+Assert ((Get-Content $env:FIVEAPPS_MOCK_STATE).Count -eq 5) 'Invalid ledger removes nothing'
+Set-Content $state $before.TrimEnd()
 $env:FIVEAPPS_MOCK_MODE='undo-error'
 $output=Run-Installer '/undo'
 Assert ($output[-1] -eq 1) 'Failed undo returns failure'

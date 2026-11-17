@@ -90,11 +90,7 @@ if errorlevel 1 (
   call :stop "Not enough free space. Please free up at least %MIN_GB% GB on your C: drive and run this again."
   exit /b 1
 )
-curl.exe -fs -m 10 -o nul https://www.msftconnecttest.com/connecttest.txt
-if errorlevel 1 (
-  call :stop "Could not reach the internet. Check your connection, date and time, and any VPN or proxy, then run this again."
-  exit /b 1
-)
+REM Network and source failures are handled by winget for the actual package operation.
 echo       PC check passed.
 
 REM ---- Step 2: require the official Windows installer engine ----

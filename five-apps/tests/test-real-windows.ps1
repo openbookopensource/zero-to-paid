@@ -15,12 +15,19 @@ if (-not (Get-Command winget.exe -ErrorAction SilentlyContinue)) {
     Import-Module Microsoft.WinGet.Client
     Repair-WinGetPackageManager -Force -Latest
 }
-$winget = (Get-Command winget.exe -ErrorAction Stop).Source
+# App execution aliases are special files, not readable PE executables.
+# Resolve Microsoft's installed AppX package, then verify the real binary.
+$package = Get-AppxPackage -Name Microsoft.DesktopAppInstaller |
+    Sort-Object Version -Descending | Select-Object -First 1
+if (-not $package -or -not $package.InstallLocation) { throw 'Microsoft App Installer package is unavailable.' }
+$winget = Join-Path $package.InstallLocation 'winget.exe'
 $signature = Get-AuthenticodeSignature -LiteralPath $winget
 if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Microsoft Corporation') {
     throw 'WinGet does not have a valid Microsoft signature.'
 }
 Write-Host 'PASS: WinGet signature valid and Microsoft publisher verified'
+# Ensure this controlled test also gives the wrapper the verified engine first.
+$env:PATH = (Split-Path $winget -Parent) + ';' + $env:PATH
 & $winget --version
 $ids = @('Google.Chrome','VideoLAN.VLC','7zip.7zip','Zoom.Zoom','Notepad++.Notepad++')
 $existing = @()
@@ -63,6 +70,11 @@ foreach ($id in $ids) {
 $state = Join-Path $env:LOCALAPPDATA 'FiveApps\installed-by-us.txt'
 $tracked = if (Test-Path $state) { @(Get-Content $state) } else { @() }
 foreach ($id in $existing) { if ($tracked -contains $id) { throw "Pre-existing app incorrectly tracked: $id" } }
+$expected = @($ids | Where-Object { $existing -notcontains $_ })
+if ($tracked.Count -ne $expected.Count -or @($tracked | Select-Object -Unique).Count -ne $tracked.Count) {
+    throw 'Ownership records do not contain exactly one record for each newly added app.'
+}
+foreach ($id in $expected) { if ($tracked -notcontains $id) { throw "New app missing from ownership records: $id" } }
 Write-Host 'PASS: Five apps inventoried after install; pre-existing apps not claimed'
 Run-Package
 $after = if (Test-Path $state) { @(Get-Content $state) } else { @() }
@@ -73,9 +85,10 @@ foreach ($id in $existing) {
     & $winget list --id $id -e --source winget --disable-interactivity --accept-source-agreements | Out-Host
     if ($LASTEXITCODE -ne 0) { throw "Undo lost a pre-existing app: $id" }
 }
-foreach ($id in $tracked) {
+foreach ($id in $expected) {
     & $winget list --id $id -e --source winget --disable-interactivity --accept-source-agreements | Out-Host
     if ($LASTEXITCODE -ne -1978335212) { throw "Undo did not confirm absence of $id" }
 }
+if (Test-Path $state) { throw 'Undo left ownership records behind.' }
 Write-Host 'PASS: Real Windows 11 install, rerun and undo completed; pre-existing apps preserved'
 Write-Host 'LIMIT: ARM64 runner; no x64 client, interactive UAC, first-launch GUI, offline or low-disk claim.'

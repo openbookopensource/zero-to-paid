@@ -37,8 +37,10 @@ Add-Type -TypeDefinition $source -OutputAssembly (Join-Path $sandbox 'winget.exe
 $env:PATH = $sandbox + ';' + $env:PATH
 $install = Join-Path $root 'package\Install-5-Apps.bat'
 function Run-Installer([string]$arg='') {
- & cmd.exe /d /c "`"$install`" $arg < NUL"
- return $LASTEXITCODE
+ $text = & cmd.exe /d /c "`"$install`" $arg < NUL" 2>&1
+ $rc = $LASTEXITCODE
+ $text | ForEach-Object { Write-Host $_ }
+ return $rc
 }
 function Assert([bool]$ok, [string]$message) { if(-not $ok) { throw $message }; Write-Host "PASS: $message" }
 $output = Run-Installer '/dryrun'

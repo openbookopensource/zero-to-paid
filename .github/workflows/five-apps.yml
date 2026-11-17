@@ -1,0 +1,31 @@
+name: Five Apps Windows checks
+on:
+  push:
+    branches: [five-apps-launch]
+  pull_request:
+    paths: ['five-apps/**', '.github/workflows/five-apps.yml']
+permissions:
+  contents: read
+jobs:
+  behavior:
+    runs-on: windows-11-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6, resolved from upstream
+        with:
+          persist-credentials: false
+      - name: Static batch checks
+        run: python five-apps/tools/batch_lint.py five-apps/package/Install-5-Apps.bat five-apps/package/Uninstall-5-Apps.bat
+      - name: Windows behavior with simulated apps
+        shell: powershell
+        run: ./five-apps/tests/test-windows.ps1
+  real-install:
+    runs-on: windows-11-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          persist-credentials: false
+      - name: Verify protection and real app installation on disposable Windows 11
+        shell: powershell
+        run: ./five-apps/tests/test-real-windows.ps1

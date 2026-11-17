@@ -1,0 +1,11 @@
+# OWASP safety mapping — candidate, not certification
+
+Reviewed official OWASP guidance on 17 November 2026:
+
+- [Prompt Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html): external files and pages are data; do not accept embedded permissions. Account choice came from the user. No account histories or credentials are extracted. No LLM or autonomous tool agent ships in the customer wrapper, so customer prompt input cannot reach executable commands through an LLM feature.
+- [Software Supply Chain Security](https://cheatsheetseries.owasp.org/cheatsheets/Software_Supply_Chain_Security_Cheat_Sheet.html): original sources preserved; separate source review; isolated disposable runner; CI token read-only with checkout credentials not persisted; checkout pinned to the upstream-resolved commit. No bundled third-party app binaries or prerequisite download scripts. Secret scan completed on source; package final scan required again after changes.
+- [OS Command Injection Defense](https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html): fixed app IDs; no user-customizable arbitrary command feature; full undo ledger allowlist validation before batch expands its lines; exact package selection; no eval of website or package descriptions. Preview exits before administrative elevation and filesystem setup. Invalid inventory or ledger records stop the affected action.
+
+Residual gaps: batch remains more fragile than an implementation using direct process APIs. System PATH executable substitution, unusual path characters, concurrent ledger editing, package supply-chain compromise and malware scans of actual downloaded installers require additional review/testing. Hash checks alone do not prove safety. Administrator privileges are still requested for an actual install/undo and must be tested on a disposable Windows target. This is not an OWASP audit or compliance claim.
+
+Public customer release is blocked until real Windows install/repeat/undo and source/publisher checks are observed. Do not weaken endpoint protection, bypass warnings, or test this on the owner's laptop to accelerate release.
